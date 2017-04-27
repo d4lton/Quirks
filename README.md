@@ -1,2 +1,2 @@
-# Hemp
-A lightweight HTML Canvas with object model
+# Quirks
+A behavior-based Javacript Web Library
