@@ -1,0 +1,48 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div class="test-div">Hello</div>
+    <script src="dist/QuirksManager.umd.js"></script>
+    <script>
+      class ColorChangeQuirk extends QuirksManager.Quirk {
+        onStart() {
+          this._element.style.color = 'red';
+        };
+      };
+
+      class WindowResizeQuirk extends QuirksManager.Quirk {
+        _resizeListener(event) {
+          this._element.innerText = event.target.innerWidth;
+        };
+        onStart() {
+          var listener = this._resizeListener.bind(this);
+          window.addEventListener('resize', listener);
+        };
+      };
+
+      class ElementChangeQuirk extends QuirksManager.Quirk {
+        onStart() {
+          var observer = new MutationObserver(function(mutations) {
+            console.log(mutations);
+          });
+          var config = {attributes: true, childList: true, characterData: true};
+          observer.observe(this._element, config);
+        };
+      };
+
+      var bm = new QuirksManager();
+      bm.add('.test-div', new ElementChangeQuirk());
+      bm.add('.test-div', new ColorChangeQuirk());
+      bm.add('.test-div', new WindowResizeQuirk());
+
+      var element = document.createElement('div');
+
+      var body = document.getElementsByTagName('body')[0];
+      bm.add(body, new ElementChangeQuirk());
+      body.appendChild(element);
+
+      bm.start();
+    </script>
+  </body>
+</html>
