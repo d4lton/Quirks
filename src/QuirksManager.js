@@ -3,6 +3,7 @@ import Quirk from './quirks/Quirk.js';
 class QuirksManager {
 
   constructor() {
+    this._observe();
   };
 
   add(selector, quirk) {
@@ -23,6 +24,35 @@ class QuirksManager {
     element.quirks.push(quirk);
     quirk.setElement(element);
     element.classList.add('quirk-enabled');
+  };
+
+  _observe() {
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList') {
+          if (mutation.removedNodes) {
+            mutation.removedNodes.forEach(function(node) {
+              if (node.quirks) {
+                node.quirks.forEach(function(quirk) {
+                  quirk.remove();
+                }.bind(this));
+              }
+            }.bind(this));
+          }
+          if (mutation.addedNodes) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.quirks) {
+                node.quirks.forEach(function(quirk) {
+                  quirk.add();
+                }.bind(this));
+              }
+            }.bind(this));
+          }
+        }
+      }.bind(this));
+    }.bind(this));
+    var config = {attributes: false, childList: true, characterData: false, subtree: true};
+    observer.observe(document, config);
   };
 
   start() {

@@ -10,21 +10,47 @@ class Quirk {
 
   start() {
     this.onStart();
+    this._animate();
+  };
+
+  _animate() {
     if (this._animated) {
       window.requestAnimationFrame(this.update.bind(this));
     }
   };
 
+  _asyncCall(method, ...args) {
+    if (typeof this[method] === 'function') {
+      setTimeout(function() {
+        this[method].apply(this, args);
+      }.bind(this), 0);
+    }
+  };
+
   update(timestamp) {
-    this._timestamp = timestamp;
-    this.onUpdate();
-    window.requestAnimationFrame(this.update.bind(this));
+    this.onUpdate(timestamp);
+    this._animate();
+  };
+
+  add() {
+    this._asyncCall('onAdd');
+  };
+
+  remove() {
+    this._animated = false;
+    this._asyncCall('onRemove');
   };
 
   onStart() {
   };
 
-  onUpdate() {
+  onUpdate(timestamp) {
+  };
+
+  onAdd() {
+  };
+
+  onRemove() {
   };
 
 };

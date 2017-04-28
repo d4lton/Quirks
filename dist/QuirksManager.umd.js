@@ -109,31 +109,65 @@ var Quirk = function () {
   }
 
   createClass(Quirk, [{
-    key: "setElement",
+    key: 'setElement',
     value: function setElement(element) {
       this._element = element;
     }
   }, {
-    key: "start",
+    key: 'start',
     value: function start() {
       this.onStart();
+      this._animate();
+    }
+  }, {
+    key: '_animate',
+    value: function _animate() {
       if (this._animated) {
         window.requestAnimationFrame(this.update.bind(this));
       }
     }
   }, {
-    key: "update",
-    value: function update(timestamp) {
-      this._timestamp = timestamp;
-      this.onUpdate();
-      window.requestAnimationFrame(this.update.bind(this));
+    key: '_asyncCall',
+    value: function _asyncCall(method) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      if (typeof this[method] === 'function') {
+        setTimeout(function () {
+          this[method].apply(this, args);
+        }.bind(this), 0);
+      }
     }
   }, {
-    key: "onStart",
+    key: 'update',
+    value: function update(timestamp) {
+      this.onUpdate(timestamp);
+      this._animate();
+    }
+  }, {
+    key: 'add',
+    value: function add() {
+      this._asyncCall('onAdd');
+    }
+  }, {
+    key: 'remove',
+    value: function remove() {
+      this._animated = false;
+      this._asyncCall('onRemove');
+    }
+  }, {
+    key: 'onStart',
     value: function onStart() {}
   }, {
-    key: "onUpdate",
-    value: function onUpdate() {}
+    key: 'onUpdate',
+    value: function onUpdate(timestamp) {}
+  }, {
+    key: 'onAdd',
+    value: function onAdd() {}
+  }, {
+    key: 'onRemove',
+    value: function onRemove() {}
   }]);
   return Quirk;
 }();
@@ -141,6 +175,8 @@ var Quirk = function () {
 var QuirksManager = function () {
   function QuirksManager() {
     classCallCheck(this, QuirksManager);
+
+    this._observe();
   }
 
   createClass(QuirksManager, [{
@@ -164,6 +200,36 @@ var QuirksManager = function () {
       element.quirks.push(quirk);
       quirk.setElement(element);
       element.classList.add('quirk-enabled');
+    }
+  }, {
+    key: '_observe',
+    value: function _observe() {
+      var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          if (mutation.type === 'childList') {
+            if (mutation.removedNodes) {
+              mutation.removedNodes.forEach(function (node) {
+                if (node.quirks) {
+                  node.quirks.forEach(function (quirk) {
+                    quirk.remove();
+                  }.bind(this));
+                }
+              }.bind(this));
+            }
+            if (mutation.addedNodes) {
+              mutation.addedNodes.forEach(function (node) {
+                if (node.quirks) {
+                  node.quirks.forEach(function (quirk) {
+                    quirk.add();
+                  }.bind(this));
+                }
+              }.bind(this));
+            }
+          }
+        }.bind(this));
+      }.bind(this));
+      var config = { attributes: false, childList: true, characterData: false, subtree: true };
+      observer.observe(document, config);
     }
   }, {
     key: 'start',
