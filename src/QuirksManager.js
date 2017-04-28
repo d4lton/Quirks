@@ -23,13 +23,22 @@ class QuirksManager {
     }
   }
 
+  start() {
+    var elements = document.querySelectorAll('.quirk-enabled');
+    elements.forEach(function(element) {
+      element.quirks.forEach(function(quirk) {
+        quirk.start();
+      });
+    });
+  }
+
   _add(element, quirk) {
     if (quirk instanceof Quirk) {
       if (!element.quirks) {
         element.quirks = [];
       }
       element.quirks.push(quirk);
-      quirk.setElement(element);
+      quirk.element = element;
       element.classList.add('quirk-enabled');
     } else {
       throw new Error('must be instance of Quirk');
@@ -63,15 +72,6 @@ class QuirksManager {
     }.bind(this));
     var config = {attributes: false, childList: true, characterData: false, subtree: true};
     observer.observe(document, config);
-  }
-
-  start() {
-    var elements = document.querySelectorAll('.quirk-enabled');
-    elements.forEach(function(element) {
-      element.quirks.forEach(function(quirk) {
-        quirk.start();
-      });
-    });
   }
 
 }

@@ -34,7 +34,7 @@ var createClass = function () {
 
 
 
-var get = function get(object, property, receiver) {
+var get$1 = function get$1(object, property, receiver) {
   if (object === null) object = Function.prototype;
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
@@ -44,7 +44,7 @@ var get = function get(object, property, receiver) {
     if (parent === null) {
       return undefined;
     } else {
-      return get(parent, property, receiver);
+      return get$1(parent, property, receiver);
     }
   } else if ("value" in desc) {
     return desc.value;
@@ -75,14 +75,14 @@ var get = function get(object, property, receiver) {
 
 
 
-var set = function set(object, property, value, receiver) {
+var set$1 = function set$1(object, property, value, receiver) {
   var desc = Object.getOwnPropertyDescriptor(object, property);
 
   if (desc === undefined) {
     var parent = Object.getPrototypeOf(object);
 
     if (parent !== null) {
-      set(parent, property, value, receiver);
+      set$1(parent, property, value, receiver);
     }
   } else if ("value" in desc && desc.writable) {
     desc.value = value;
@@ -105,30 +105,48 @@ var set = function set(object, property, value, receiver) {
  */
 var Quirk = function () {
   function Quirk() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$animated = _ref.animated,
-        animated = _ref$animated === undefined ? false : _ref$animated;
-
     classCallCheck(this, Quirk);
-
-    this._animated = animated;
   }
 
   createClass(Quirk, [{
-    key: 'setElement',
-    value: function setElement(element) {
-      this._element = element;
-    }
-  }, {
     key: 'start',
     value: function start() {
       this.onStart();
       this._animate();
     }
   }, {
+    key: 'update',
+    value: function update(timestamp) {
+      this.onUpdate(timestamp);
+      this._animate();
+    }
+  }, {
+    key: 'add',
+    value: function add() {
+      this._asyncCall('onAdd');
+    }
+  }, {
+    key: 'remove',
+    value: function remove() {
+      this.animated = false;
+      this._asyncCall('onRemove');
+    }
+  }, {
+    key: 'onStart',
+    value: function onStart() {}
+  }, {
+    key: 'onUpdate',
+    value: function onUpdate(timestamp) {}
+  }, {
+    key: 'onAdd',
+    value: function onAdd() {}
+  }, {
+    key: 'onRemove',
+    value: function onRemove() {}
+  }, {
     key: '_animate',
     value: function _animate() {
-      if (this._animated) {
+      if (this.animated) {
         window.requestAnimationFrame(this.update.bind(this));
       }
     }
@@ -146,34 +164,18 @@ var Quirk = function () {
       }
     }
   }, {
-    key: 'update',
-    value: function update(timestamp) {
-      this.onUpdate(timestamp);
-      this._animate();
+    key: 'element',
+    set: function set(value) {
+      this._element = value;
     }
   }, {
-    key: 'add',
-    value: function add() {
-      this._asyncCall('onAdd');
+    key: 'animated',
+    set: function set(value) {
+      this._animated = value;
+    },
+    get: function get() {
+      return this._animated;
     }
-  }, {
-    key: 'remove',
-    value: function remove() {
-      this._animated = false;
-      this._asyncCall('onRemove');
-    }
-  }, {
-    key: 'onStart',
-    value: function onStart() {}
-  }, {
-    key: 'onUpdate',
-    value: function onUpdate(timestamp) {}
-  }, {
-    key: 'onAdd',
-    value: function onAdd() {}
-  }, {
-    key: 'onRemove',
-    value: function onRemove() {}
   }]);
   return Quirk;
 }();
@@ -204,6 +206,16 @@ var QuirksManager = function () {
       }
     }
   }, {
+    key: 'start',
+    value: function start() {
+      var elements = document.querySelectorAll('.quirk-enabled');
+      elements.forEach(function (element) {
+        element.quirks.forEach(function (quirk) {
+          quirk.start();
+        });
+      });
+    }
+  }, {
     key: '_add',
     value: function _add(element, quirk) {
       if (quirk instanceof Quirk) {
@@ -211,7 +223,7 @@ var QuirksManager = function () {
           element.quirks = [];
         }
         element.quirks.push(quirk);
-        quirk.setElement(element);
+        quirk.element = element;
         element.classList.add('quirk-enabled');
       } else {
         throw new Error('must be instance of Quirk');
@@ -246,16 +258,6 @@ var QuirksManager = function () {
       }.bind(this));
       var config = { attributes: false, childList: true, characterData: false, subtree: true };
       observer.observe(document, config);
-    }
-  }, {
-    key: 'start',
-    value: function start() {
-      var elements = document.querySelectorAll('.quirk-enabled');
-      elements.forEach(function (element) {
-        element.quirks.forEach(function (quirk) {
-          quirk.start();
-        });
-      });
     }
   }]);
   return QuirksManager;

@@ -33,16 +33,14 @@
       }
 
       class FrameUpdateQuirk extends Quirks.Quirk {
-        constructor() {
-          super({animated: true});
-        }
         onStart() {
+          this.animated = true;
           this._originalText = this._element.innerText;
           this._frame = 0;
         }
         onUpdate(timestamp) {
           this._frame++;
-          this._element.innerText = this._originalText + this._frame + ' ' + timestamp;
+          this._element.innerText = this._originalText + this._frame + ', timestamp: ' + timestamp;
         }
       }
 
@@ -58,7 +56,7 @@
       }, 2000);
 
       var element2 = document.createElement('div');
-      element2.innerText = "Frames: ";
+      element2.innerText = "Frame: ";
       bm.add(element2, new FrameUpdateQuirk());
       document.body.appendChild(element2);
 
