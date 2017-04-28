@@ -1,4 +1,4 @@
-import Quirk from './Quirk.js';
+import Quirk from './quirks/Quirk.js';
 
 class QuirksManager {
 
@@ -29,7 +29,7 @@ class QuirksManager {
     var elements = document.querySelectorAll('.quirk-enabled');
     elements.forEach(function(element) {
       element.quirks.forEach(function(quirk) {
-        quirk.onStart();
+        quirk.start();
       });
     });
   };

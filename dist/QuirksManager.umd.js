@@ -99,7 +99,13 @@ var set = function set(object, property, value, receiver) {
 
 var Quirk = function () {
   function Quirk() {
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$animated = _ref.animated,
+        animated = _ref$animated === undefined ? false : _ref$animated;
+
     classCallCheck(this, Quirk);
+
+    this._animated = animated;
   }
 
   createClass(Quirk, [{
@@ -108,8 +114,26 @@ var Quirk = function () {
       this._element = element;
     }
   }, {
+    key: "start",
+    value: function start() {
+      this.onStart();
+      if (this._animated) {
+        window.requestAnimationFrame(this.update.bind(this));
+      }
+    }
+  }, {
+    key: "update",
+    value: function update(timestamp) {
+      this._timestamp = timestamp;
+      this.onUpdate();
+      window.requestAnimationFrame(this.update.bind(this));
+    }
+  }, {
     key: "onStart",
     value: function onStart() {}
+  }, {
+    key: "onUpdate",
+    value: function onUpdate() {}
   }]);
   return Quirk;
 }();
@@ -147,7 +171,7 @@ var QuirksManager = function () {
       var elements = document.querySelectorAll('.quirk-enabled');
       elements.forEach(function (element) {
         element.quirks.forEach(function (quirk) {
-          quirk.onStart();
+          quirk.start();
         });
       });
     }

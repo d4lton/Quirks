@@ -31,15 +31,33 @@
         };
       };
 
+      class FrameUpdateQuirk extends QuirksManager.Quirk {
+        constructor() {
+          super({animated: true});
+        }
+        onStart() {
+          this._originalText = this._element.innerText;
+          this._frame = 0;
+        };
+        onUpdate() {
+          this._frame++;
+          this._element.innerText = this._originalText + this._frame;
+        };
+      };
+
       var bm = new QuirksManager();
-      bm.add('.test-div', new ElementChangeQuirk());
       bm.add('.test-div', new ColorChangeQuirk());
       bm.add('.test-div', new WindowResizeQuirk());
 
       var element = document.createElement('div');
-
+      element.innerText = "Look in console for MutationRecord";
       var body = document.getElementsByTagName('body')[0];
-      bm.add(body, new ElementChangeQuirk());
+      bm.add(element, new ElementChangeQuirk());
+      body.appendChild(element);
+
+      element = document.createElement('div');
+      element.innerText = "Frames: ";
+      bm.add(element, new FrameUpdateQuirk());
       body.appendChild(element);
 
       bm.start();
