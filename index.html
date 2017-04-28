@@ -24,11 +24,17 @@
       }
 
       class ElementChangeQuirk extends Quirks.Quirk {
-        onAdd() {
-          console.log('added', this);
+        onAdd(element) {
+          console.log('added', element, this);
         }
-        onRemove() {
-          console.log('removed', this);
+        onRemove(element) {
+          console.log('removed', element, this);
+        }
+        onChange(element, mutation) {
+          console.log('changed', element, mutation, this);
+        }
+        onUpdate(timestamp) {
+          console.log('updated', this);
         }
       }
 
@@ -49,7 +55,7 @@
       bm.add('.test-div', new WindowResizeQuirk());
 
       var element1 = document.createElement('div');
-      element1.innerText = "Look in console for MutationRecord";
+      element1.innerText = "Look in console for add / remove events";
       bm.add(element1, new ElementChangeQuirk());
       setTimeout(function() {
         document.body.appendChild(element1);

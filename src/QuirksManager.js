@@ -16,6 +16,7 @@ class QuirksManager {
     if (selector instanceof HTMLElement) {
       this._add(selector, quirk);
     } else {
+      // TODO: fix this, Quirk is currently only aware of being owned by 1 element
       var elements = document.querySelectorAll(selector);
       elements.forEach(function(element) {
         this._add(element, quirk);
@@ -53,7 +54,7 @@ class QuirksManager {
             mutation.removedNodes.forEach(function(node) {
               if (node.quirks) {
                 node.quirks.forEach(function(quirk) {
-                  quirk.remove();
+                  quirk.remove(node);
                 }.bind(this));
               }
             }.bind(this));
@@ -62,7 +63,7 @@ class QuirksManager {
             mutation.addedNodes.forEach(function(node) {
               if (node.quirks) {
                 node.quirks.forEach(function(quirk) {
-                  quirk.add();
+                  quirk.add(node);
                 }.bind(this));
               }
             }.bind(this));
@@ -70,7 +71,7 @@ class QuirksManager {
         }
       }.bind(this));
     }.bind(this));
-    var config = {attributes: false, childList: true, characterData: false, subtree: true};
+    var config = {childList: true, subtree: true};
     observer.observe(document, config);
   }
 
