@@ -34,7 +34,7 @@ for (const format of ['umd']) {
       presets: pkg.babel.presets.map(x => (x === 'latest' ? ['latest', { es2015: { modules: false } }] : x)),
     }))],
   }).then(bundle => bundle.write({
-    dest: `dist/${format === 'cjs' ? 'QuirksManager' : `QuirksManager.${format}`}.js`,
+    dest: `dist/${format === 'cjs' ? 'Quirks' : `Quirks.${format}`}.js`,
     format,
     sourceMap: true,
     moduleName: format === 'umd' ? pkg.name : undefined,

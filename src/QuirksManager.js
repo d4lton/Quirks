@@ -1,10 +1,16 @@
+/**
+ * QuirksManager
+ *
+ * Copyright ©2017 Dana Basken <dbasken@gmail.com>
+ *
+ */
 import Quirk from './quirks/Quirk.js';
 
 class QuirksManager {
 
   constructor() {
     this._observe();
-  };
+  }
 
   add(selector, quirk) {
     if (selector instanceof HTMLElement) {
@@ -15,16 +21,20 @@ class QuirksManager {
         this._add(element, quirk);
       }.bind(this));
     }
-  };
+  }
 
   _add(element, quirk) {
-    if (!element.quirks) {
-      element.quirks = [];
+    if (quirk instanceof Quirk) {
+      if (!element.quirks) {
+        element.quirks = [];
+      }
+      element.quirks.push(quirk);
+      quirk.setElement(element);
+      element.classList.add('quirk-enabled');
+    } else {
+      throw new Error('must be instance of Quirk');
     }
-    element.quirks.push(quirk);
-    quirk.setElement(element);
-    element.classList.add('quirk-enabled');
-  };
+  }
 
   _observe() {
     var observer = new MutationObserver(function(mutations) {
@@ -53,7 +63,7 @@ class QuirksManager {
     }.bind(this));
     var config = {attributes: false, childList: true, characterData: false, subtree: true};
     observer.observe(document, config);
-  };
+  }
 
   start() {
     var elements = document.querySelectorAll('.quirk-enabled');
@@ -62,10 +72,8 @@ class QuirksManager {
         quirk.start();
       });
     });
-  };
+  }
 
-};
+}
 
-QuirksManager.Quirk = Quirk;
-
-export default QuirksManager;
+export {QuirksManager, Quirk};

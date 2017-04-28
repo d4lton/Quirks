@@ -2,71 +2,68 @@
   <head>
   </head>
   <body>
-    <div class="test-div">Hello</div>
-    <script src="dist/QuirksManager.umd.js"></script>
+    <div class="test-div">Hello, I started out black, now I'm red. Resize the window.</div>
+    <script src="dist/Quirks.umd.js"></script>
     <script>
-      class ColorChangeQuirk extends QuirksManager.Quirk {
+
+      class ColorChangeQuirk extends Quirks.Quirk {
         onStart() {
           this._element.style.color = 'red';
-        };
-      };
+        }
+      }
 
-      class WindowResizeQuirk extends QuirksManager.Quirk {
-        _resizeListener(event) {
-          this._element.innerText = event.target.innerWidth;
-        };
+      class WindowResizeQuirk extends Quirks.Quirk {
         onStart() {
+          this._innerText = this._element.innerText;
           var listener = this._resizeListener.bind(this);
           window.addEventListener('resize', listener);
-        };
-      };
+        }
+        _resizeListener(event) {
+          this._element.innerText = this._innerText + ' (width: ' + event.target.innerWidth + ')';
+        }
+      }
 
-      class ElementChangeQuirk extends QuirksManager.Quirk {
-        onStart() {
-          var observer = new MutationObserver(function(mutations) {
-            console.log(mutations);
-          });
-          var config = {attributes: true, childList: true, characterData: true};
-          observer.observe(this._element, config);
-        };
+      class ElementChangeQuirk extends Quirks.Quirk {
         onAdd() {
           console.log('added', this);
         }
         onRemove() {
           console.log('removed', this);
         }
-      };
+      }
 
-      class FrameUpdateQuirk extends QuirksManager.Quirk {
+      class FrameUpdateQuirk extends Quirks.Quirk {
         constructor() {
           super({animated: true});
         }
         onStart() {
           this._originalText = this._element.innerText;
           this._frame = 0;
-        };
+        }
         onUpdate(timestamp) {
           this._frame++;
           this._element.innerText = this._originalText + this._frame + ' ' + timestamp;
-        };
-      };
+        }
+      }
 
-      var bm = new QuirksManager();
+      var bm = new Quirks.QuirksManager();
       bm.add('.test-div', new ColorChangeQuirk());
       bm.add('.test-div', new WindowResizeQuirk());
 
-      var element = document.createElement('div');
-      element.innerText = "Look in console for MutationRecord";
-      var body = document.getElementsByTagName('body')[0];
-      bm.add(element, new ElementChangeQuirk());
-      body.appendChild(element);
+      var element1 = document.createElement('div');
+      element1.innerText = "Look in console for MutationRecord";
+      bm.add(element1, new ElementChangeQuirk());
+      setTimeout(function() {
+        document.body.appendChild(element1);
+      }, 2000);
 
-      element = document.createElement('div');
-      element.innerText = "Frames: ";
-      bm.add(element, new FrameUpdateQuirk());
-      body.appendChild(element);
+      var element2 = document.createElement('div');
+      element2.innerText = "Frames: ";
+      bm.add(element2, new FrameUpdateQuirk());
+      document.body.appendChild(element2);
 
       bm.start();
+
     </script>
   </body>
 </html>

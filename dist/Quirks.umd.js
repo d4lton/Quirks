@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global.QuirksManager = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.Quirks = global.Quirks || {})));
+}(this, (function (exports) { 'use strict';
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -97,6 +97,12 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
+/**
+ * Quirk
+ *
+ * Copyright ©2017 Dana Basken <dbasken@gmail.com>
+ *
+ */
 var Quirk = function () {
   function Quirk() {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -172,6 +178,12 @@ var Quirk = function () {
   return Quirk;
 }();
 
+/**
+ * QuirksManager
+ *
+ * Copyright ©2017 Dana Basken <dbasken@gmail.com>
+ *
+ */
 var QuirksManager = function () {
   function QuirksManager() {
     classCallCheck(this, QuirksManager);
@@ -194,12 +206,16 @@ var QuirksManager = function () {
   }, {
     key: '_add',
     value: function _add(element, quirk) {
-      if (!element.quirks) {
-        element.quirks = [];
+      if (quirk instanceof Quirk) {
+        if (!element.quirks) {
+          element.quirks = [];
+        }
+        element.quirks.push(quirk);
+        quirk.setElement(element);
+        element.classList.add('quirk-enabled');
+      } else {
+        throw new Error('must be instance of Quirk');
       }
-      element.quirks.push(quirk);
-      quirk.setElement(element);
-      element.classList.add('quirk-enabled');
     }
   }, {
     key: '_observe',
@@ -245,11 +261,10 @@ var QuirksManager = function () {
   return QuirksManager;
 }();
 
+exports.QuirksManager = QuirksManager;
+exports.Quirk = Quirk;
 
-
-QuirksManager.Quirk = Quirk;
-
-return QuirksManager;
+Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-//# sourceMappingURL=QuirksManager.umd.js.map
+//# sourceMappingURL=Quirks.umd.js.map
